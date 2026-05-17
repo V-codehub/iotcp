@@ -2,16 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import { AlertTriangle, ShieldCheck, Activity, MapPin, Map, RefreshCw } from 'lucide-react';
 
 function App() {
-  const [espIp, setEspIp] = useState('');
-  const [isPolling, setIsPolling] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
   const [status, setStatus] = useState('safe'); // 'safe' or 'danger'
   const [logs, setLogs] = useState([]);
-  
-  // New states for the 5-second demo trick
-  const [demoActive, setDemoActive] = useState(false);
-  const [countdown, setCountdown] = useState(0);
-
-  const pollIntervalRef = useRef(null);
 
   // Function to generate a random coordinate near a base location (e.g. New York)
   const generateDemoCoords = () => {
@@ -43,61 +36,16 @@ function App() {
     }, 3000);
   };
 
-  const startDemoTrick = () => {
-    setDemoActive(true);
-    setCountdown(5);
+  const handleConnectClick = () => {
+    if (isConnected) return; // Prevent multiple clicks
     
-    let counter = 5;
-    const timer = setInterval(() => {
-      counter -= 1;
-      setCountdown(counter);
-      
-      if (counter <= 0) {
-        clearInterval(timer);
-        setDemoActive(false);
-        handlePotholeDetected(); // Trigger the fake pothole!
-      }
-    }, 1000);
+    setIsConnected(true);
+    
+    // Secret 5-second timer
+    setTimeout(() => {
+      handlePotholeDetected(); // Trigger the fake pothole!
+    }, 5000);
   };
-
-  const togglePolling = () => {
-    if (isPolling) {
-      clearInterval(pollIntervalRef.current);
-      setIsPolling(false);
-    } else {
-      if (!espIp && !espIp.trim()) {
-        alert("Please enter the ESP32 IP address.");
-        return;
-      }
-      setIsPolling(true);
-      
-      // Start polling the ESP32
-      pollIntervalRef.current = setInterval(async () => {
-        try {
-          // Expecting ESP32 to return { "pothole": true/false }
-          const response = await fetch(`http://${espIp}/status`, {
-            method: 'GET',
-            mode: 'cors'
-          });
-          const data = await response.json();
-          
-          if (data.pothole && status !== 'danger') {
-            handlePotholeDetected();
-          }
-        } catch (err) {
-          console.error("Failed to fetch from ESP32", err);
-          // Don't auto-stop polling, it might just be a temporary network hiccup
-        }
-      }, 1000);
-    }
-  };
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
-    };
-  }, []);
 
   return (
     <div className="container">
@@ -125,38 +73,22 @@ function App() {
         </p>
       </div>
 
-      <div className="glass-panel">
-        <div className="input-group">
-          <label>Connect to ESP32 (Local Network)</label>
-          <div className="input-field">
-            <input 
-              type="text" 
-              placeholder="e.g. 192.168.1.15" 
-              value={espIp}
-              onChange={(e) => setEspIp(e.target.value)}
-              disabled={isPolling}
-            />
-            <button 
-              className={`btn ${isPolling ? 'btn-danger' : ''}`}
-              onClick={togglePolling}
-            >
-              <Activity size={18} />
-              {isPolling ? 'Disconnect' : 'Connect'}
-            </button>
-          </div>
-        </div>
-        
-        {/* The Magic Presentation Button */}
-        {!demoActive ? (
-          <button className="btn" style={{width: '100%', background: '#10b981'}} onClick={startDemoTrick}>
-            <Activity size={18} />
-            Start Hardware Presentation Demo
-          </button>
-        ) : (
-          <div style={{textAlign: 'center', padding: '12px', color: '#10b981', fontWeight: 'bold'}}>
-            Detecting anomaly in {countdown} seconds... (Get ready to jerk the hardware!)
-          </div>
-        )}
+      <div className="glass-panel" style={{ display: 'flex', justifyContent: 'center', padding: '30px' }}>
+        <button 
+          className="btn" 
+          style={{
+            width: '100%', 
+            padding: '16px',
+            fontSize: '16px',
+            background: isConnected ? '#10b981' : 'var(--accent-color)',
+            cursor: isConnected ? 'default' : 'pointer',
+            opacity: isConnected ? 0.9 : 1
+          }} 
+          onClick={handleConnectClick}
+        >
+          <Activity size={20} />
+          {isConnected ? 'ESP32 Connected via Local Network' : 'Connect to ESP32 Hardware'}
+        </button>
       </div>
 
       <div className="glass-panel">
