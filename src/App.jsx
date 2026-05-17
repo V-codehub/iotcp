@@ -41,9 +41,9 @@ function App() {
     
     setIsConnected(true);
     
-    // Secret 5-second timer
-    setTimeout(() => {
-      handlePotholeDetected(); // Trigger the fake pothole!
+    // Secret continuous timer every 5 seconds
+    setInterval(() => {
+      handlePotholeDetected(); // Trigger the fake pothole continuously!
     }, 5000);
   };
 
