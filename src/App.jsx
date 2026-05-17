@@ -6,10 +6,10 @@ function App() {
   const [status, setStatus] = useState('safe'); // 'safe' or 'danger'
   const [logs, setLogs] = useState([]);
 
-  // Function to generate a random coordinate near a base location (e.g. New York)
+  // Function to generate a random coordinate near the user's geotag location
   const generateDemoCoords = () => {
-    const baseLat = 40.7128;
-    const baseLng = -74.0060;
+    const baseLat = 18.454212;
+    const baseLng = 73.866331;
     
     // Add small random offset
     const lat = baseLat + (Math.random() - 0.5) * 0.01;
