@@ -7,6 +7,10 @@ function App() {
   const [status, setStatus] = useState('safe'); // 'safe' or 'danger'
   const [logs, setLogs] = useState([]);
   
+  // New states for the 5-second demo trick
+  const [demoActive, setDemoActive] = useState(false);
+  const [countdown, setCountdown] = useState(0);
+
   const pollIntervalRef = useRef(null);
 
   // Function to generate a random coordinate near a base location (e.g. New York)
@@ -37,6 +41,23 @@ function App() {
     setTimeout(() => {
       setStatus('safe');
     }, 3000);
+  };
+
+  const startDemoTrick = () => {
+    setDemoActive(true);
+    setCountdown(5);
+    
+    let counter = 5;
+    const timer = setInterval(() => {
+      counter -= 1;
+      setCountdown(counter);
+      
+      if (counter <= 0) {
+        clearInterval(timer);
+        setDemoActive(false);
+        handlePotholeDetected(); // Trigger the fake pothole!
+      }
+    }, 1000);
   };
 
   const togglePolling = () => {
@@ -125,10 +146,17 @@ function App() {
           </div>
         </div>
         
-        <button className="btn" style={{width: '100%'}} onClick={handlePotholeDetected}>
-          <RefreshCw size={18} />
-          Simulate Detection (Demo Mode)
-        </button>
+        {/* The Magic Presentation Button */}
+        {!demoActive ? (
+          <button className="btn" style={{width: '100%', background: '#10b981'}} onClick={startDemoTrick}>
+            <Activity size={18} />
+            Start Hardware Presentation Demo
+          </button>
+        ) : (
+          <div style={{textAlign: 'center', padding: '12px', color: '#10b981', fontWeight: 'bold'}}>
+            Detecting anomaly in {countdown} seconds... (Get ready to jerk the hardware!)
+          </div>
+        )}
       </div>
 
       <div className="glass-panel">
